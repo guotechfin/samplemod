@@ -15,7 +15,7 @@ zdf2 = requests.get('http://q.10jqka.com.cn/interface/stock/fl/zdf/desc/3/hsa/qu
 
 # r.encoding='gbk'
 
-# print (r.text.decode('unicode-escape'))
+# print (cje0.text.decode('unicode-escape'))
 
 pd.set_option('expand_frame_repr', False)
 
@@ -27,8 +27,7 @@ df_cje0 = pd.DataFrame(data_cje0)
 df_cje1 = pd.DataFrame(data_cje1)
 df_cje2 = pd.DataFrame(data_cje2)
 
-df_cje = pd.concat([df_cje0,df_cje1,df_cje2])
-
+df_cje = pd.concat([df_cje0,df_cje1,df_cje2],ignore_index=True)
 
 
 data_zdf0 = zdf0.json()[u'data']
@@ -39,7 +38,7 @@ df_zdf0 = pd.DataFrame(data_zdf0)
 df_zdf1 = pd.DataFrame(data_zdf1)
 df_zdf2 = pd.DataFrame(data_zdf2)
 
-df_zdf = pd.concat([df_zdf0,df_zdf1,df_zdf2])
+df_zdf = pd.concat([df_zdf0,df_zdf1,df_zdf2],ignore_index=True)
 
 core = pd.merge(df_cje,df_zdf,on=['stockcode'])
 
