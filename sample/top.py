@@ -52,10 +52,12 @@ df_zdf3 = pd.DataFrame(data_zdf3)
 
 df_zdf = pd.concat([df_zdf0,df_zdf1,df_zdf2,df_zdf3],ignore_index=True)
 
-core = pd.merge(df_cje,df_zdf,on=['stockcode'],sort=True)
+core = pd.merge(df_cje,df_zdf,on=['stockcode'])
+
+core['zdf_x'] = core['zdf_x'].astype(float)
 
 
 # print core[['stockcode','zdf_x','cje_x']].sort_values(['zdf_x'])
 
-print core.replace({"stockcode": dict})[['stockcode','zdf_x','cje_x']]
+print core.replace({"stockcode": dict})[['stockcode','zdf_x','cje_x']].sort_values(['zdf_x'],ascending=[0])
 
