@@ -8,8 +8,20 @@ import pandas as pd
 from core import ashare
 
 dict = ashare()
-
+pd.options.display.max_rows = 99
 # print dict['300014']
+
+from dateutil import tz
+from datetime import datetime
+# UTC Zone
+from_zone = tz.gettz('UTC')
+# China Zone
+to_zone = tz.gettz('Asia/Shanghai')
+utc = datetime.utcnow()
+# Tell the datetime object that it's in UTC time zone
+utc = utc.replace(tzinfo=from_zone)
+# Convert time zone
+local = utc.astimezone(to_zone)
 
 cje0 = requests.get('http://q.10jqka.com.cn/interface/stock/fl/cje/desc/1/hsa/quote')
 cje1 = requests.get('http://q.10jqka.com.cn/interface/stock/fl/cje/desc/2/hsa/quote')
@@ -56,7 +68,7 @@ core = pd.merge(df_cje,df_zdf,on=['stockcode'])
 
 core['zdf_x'] = core['zdf_x'].astype(float)
 
-
+print datetime.strftime(local, "%Y-%m-%d %H:%M:%S")
 # print core[['stockcode','zdf_x','cje_x']].sort_values(['zdf_x'])
 
 print core.replace({"stockcode": dict})[['stockcode','zdf_x','cje_x']].sort_values(['zdf_x'],ascending=[0])
