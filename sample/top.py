@@ -71,5 +71,9 @@ core['zdf_x'] = core['zdf_x'].astype(float)
 print datetime.strftime(local, "%Y-%m-%d %H:%M:%S")
 # print core[['stockcode','zdf_x','cje_x']].sort_values(['zdf_x'])
 
-print core.replace({"stockcode": dict})[['stockcode','zdf_x','cje_x']].sort_values(['zdf_x'],ascending=[0])
+core['name'] = core['stockcode'].map(dict)
+
+print core[['stockcode','name','zdf_x','cje_x']].sort_values(['zdf_x'],ascending=[0])
+
+# print core.replace({"stockcode": dict})[['stockcode','zdf_x','cje_x']].sort_values(['zdf_x'],ascending=[0])
 
