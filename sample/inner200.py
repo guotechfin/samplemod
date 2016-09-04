@@ -50,3 +50,23 @@ df2 = pd.DataFrame(data=chrshdict)
 rdf = pd.merge(df1,df2,how='inner')
 
 print rdf
+
+def get_data(codelist):
+    prefix = lambda x: ("sh" if x.startswith("60") else "sz") + x
+    url = "http://qt.gtimg.cn/q=" + ",".join(map(prefix, codelist))
+
+    resp = requests.get(url)
+
+    datas = {}
+    for code, line in zip(codelist, resp.text.split("\n")):
+        if len(line.strip()) == 0: continue
+
+        m = re.search(r"(.+)=\"(.+)\"", line)
+        items = m.group(2).split("~")
+        data = float(items[32])
+        datas[code] = data
+
+    return datas
+
+
+# print get_data(chr200shlist)
