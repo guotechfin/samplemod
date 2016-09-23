@@ -45,10 +45,6 @@ records = []
 for record in all_sh_json:
     # print record
     records.append(record.split(','))
-
-# print records
-
-# print all_sh_json
 #
 # all_sh_df = pd.DataFrame(records)
 all_sh_df = pd.DataFrame(records,columns=['seq', 'code', 'name', 'zuixinjia', 'zhangdiee','zhangdiefu','zhengfu','chengjiaoliang','chengjiaoe','zuoshou','jinkai','zuigao','zuidi','u1','u2','u3','u4','u5','u6','u7','u8','5fengzhong','liangbi','huanshoulv','shiyinglv'])
@@ -75,9 +71,6 @@ sh_df_cje_150 = sh_df_2[:150]
 winprob = len(sh_df_cje_150[sh_df_cje_150['zhangdiefu']>0])/150.0
 winmedian =  np.median(sh_df_cje_150['zhangdiefu'])
 
-# print ("cje prob: ", winprob)
-# print ("cje median: ",winmedian)
-
 #zxj
 sh_df_3 = sh_df_2.sort_values(['zuixinjia'],ascending=[0])
 
@@ -86,12 +79,61 @@ sh_df_zxj_150 = sh_df_3[:150]
 winprob_zxj = len(sh_df_zxj_150[sh_df_zxj_150['zhangdiefu']>0])/150.0
 winmedian_zxj =  np.median(sh_df_zxj_150['zhangdiefu'])
 
-# print ("top price 150 prob: ", winprob_zxj)
-# print ("top price 150 median: ",winmedian_zxj)
+#sz
+
+all_sz = requests.get('http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._SZAME&sty=FCOIATA&sortType=C&sortRule=-1&page=1&pageSize=2000&js=var%20quote_123%3d{rank:[(x)],pages:(pc)}&token=7bc05d0d4c3c22ef9fca8c2a912d779c&jsName=quote_123&_g=0.27786655588531173')
+
+all_sz_raw_text_tmp = all_sz.text
+
+all_sz_raw_text = re.search(r'var quote_123=\{rank:(.*),pages:.*}',all_sz_raw_text_tmp,re.S)
+
+all_sz_json_text = all_sz_raw_text.group(1)
+
+all_sz_json = json.loads(all_sz_json_text)
+
+records_sz = []
+
+for record_sz in all_sz_json:
+    # print record
+    records_sz.append(record_sz.split(','))
+#
+# all_sh_df = pd.DataFrame(records)
+all_sz_df = pd.DataFrame(records_sz,columns=['seq', 'code', 'name', 'zuixinjia', 'zhangdiee','zhangdiefu','zhengfu','chengjiaoliang','chengjiaoe','zuoshou','jinkai','zuigao','zuidi','u1','u2','u3','u4','u5','u6','u7','u8','5fengzhong','liangbi','huanshoulv','shiyinglv'])
+# print all_sh_df
+sz_df_1 = all_sz_df[(all_sz_df['zuixinjia'])!='-']
+
+sz_df_2 = sz_df_1.replace('-', '0')
+
+sz_df_2['zhangdiefu'] = sz_df_2['zhangdiefu'].replace('%','',regex=True).astype('float')
+
+
+cols_to_convert = ['zuixinjia','zhangdiefu','zhengfu','chengjiaoliang','chengjiaoe','zuoshou','jinkai','zuigao','zuidi','liangbi']
+
+for col in cols_to_convert:
+    sz_df_2[col] = sz_df_2[col].astype(float)
+
+
+#cje
+sz_df_2 = sz_df_2.sort_values(['chengjiaoe'],ascending=[0])
+
+sz_df_cje_150 = sz_df_2[:150]
+
+winprob_sz = len(sz_df_cje_150[sz_df_cje_150['zhangdiefu']>0])/150.0
+winmedian_sz =  np.median(sz_df_cje_150['zhangdiefu'])
+
+#zxj
+sz_df_3 = sz_df_2.sort_values(['zuixinjia'],ascending=[0])
+
+sz_df_zxj_150 = sz_df_3[:150]
+
+winprob_zxj_sz = len(sz_df_zxj_150[sz_df_zxj_150['zhangdiefu']>0])/150.0
+winmedian_zxj_sz =  np.median(sz_df_zxj_150['zhangdiefu'])
+
+
 
 ddate = datetime.strftime(local, "%Y-%m-%d %H:%M:%S")
-content = "成交额前150 prob: %f , \n成交额前150 median : %f, \n高价股前150 prob: %f , \n高价股前150 median : %f \n日期 : %s" % (winprob, winmedian, winprob_zxj, winmedian_zxj,ddate)
-
+content = "上海 \n成交额前150 prob: %f , \n成交额前150 median : %f, \n高价股前150 prob: %f , \n高价股前150 median : %f \n日期 : %s" % (winprob, winmedian, winprob_zxj, winmedian_zxj,ddate)
+content_sz = "\n深证 \n成交额前150 prob: %f , \n成交额前150 median : %f, \n高价股前150 prob: %f , \n高价股前150 median : %f \n日期 : %s" % (winprob_sz, winmedian_sz, winprob_zxj_sz, winmedian_zxj_sz,ddate)
 # print msg
 #
 #
@@ -101,7 +143,7 @@ gmail_user = "guo.fintech@gmail.com"
 gmail_password = ""
 
 try:
-    msg = MIMEText(content)
+    msg = MIMEText(content+content_sz)
     msg['Subject'] = "收盘简报"
     server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
     server.ehlo()
