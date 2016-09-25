@@ -139,7 +139,7 @@ content_sz = "\n深证 \n成交额前150 prob: %f , \n成交额前150 median : %
 #
 #
 #
-gmail_user = "guo.fintech@gmail.com"
+gmail_user = ""
 gmail_password = ""
 
 try:
