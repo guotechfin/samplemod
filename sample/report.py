@@ -44,18 +44,16 @@ def scanRange(start,end):
 
 #all = []
 
-for k in range(20,910,10):
-    print k
+for k in range(0,910,10):
+    print "begin {}".format(k)
     tmp = scanRange(k,k+10)
-    #all.extend(tmp)
-    #time.sleep(10*60)
-
-    with open('data.out', 'a') as outfile:
+    print "got, to write to file {}".format(k)
+    fname = "{}.out".format(k)
+    with open(fname, 'w') as outfile:
         for item in tmp:
             json.dump(item,outfile)
             outfile.write(',\n')
-    #all = []
-    # json.dump(tjson, outfile)
+    print "end {}".format(k)
     time.sleep(10*60)
 
 
