@@ -14,48 +14,55 @@ import re
 
 
 
-def getPDFUrl(infoCode,rDate):
-    from dateutil.parser import parse
-    tmp_url = 'http://data.eastmoney.com/report/'+parse(rDate).strftime('%Y'+'%m'+'%d')+'/'+infoCode+'.html'
 
 
-    html_dcm = urllib2.urlopen(tmp_url).read()
-    soup = BeautifulSoup(html_dcm, "lxml")
-    try:
-        file_url = soup.find_all(text='查看PDF原文')[0].parent.get('href')
-        return file_url
-    except:
-        print('get-pdf-url-failed ' + tmp_url)
-        pass
+
+def getPDFUrl(infoCode):
+    #APPH5PaB1P4zASearchReport
+    p = re.compile('APP(.*)ASearchReport')
+    m = p.match(infoCode)
+    key = m.group(1)
+    url  = calHashValue(key)
+    return "http://pdf.dfcfw.com/pdf/H3_AP{}_1.pdf".format(url)
+
+print getPDFUrl("APPH5PaB1P54ASearchReport")
+
+
 
 def scanRange(start,end):
     tjson = []
     for i in range(start,end):
-        raw_request = requests.get('http://datainterface.eastmoney.com//EM_DataCenter/js.aspx?type=SR&sty=GGSR&js=var%20KFhOckHz={%22data%22:[(x)],%22pages%22:%22(pc)%22,%22update%22:%22(ud)%22,%22count%22:%22(count)%22}&ps=50&p='+str(i)+'&mkt=0&stat=0&cmd=2&code=&rt=49135668')
+        raw_request = requests.get('http://datainterface.eastmoney.com//EM_DataCenter/js.aspx?type=SR&sty=GGSR&js=var%20KFhOckHz={%22data%22:[(x)],%22pages%22:%22(pc)%22,%22update%22:%22(ud)%22,%22count%22:%22(count)%22}&ps=1000&p='+str(i)+'&mkt=0&stat=0&cmd=2&code=&rt=49135668')
         p = re.compile('var KFhOckHz=(.*)')
         m = p.match(raw_request.text)
         jobj = json.loads(m.group(1),'utf-8')
         raw_records = jobj[u'data']
 
         for record in raw_records:
-            tjson.append({"author":record[u"author"],"infoCode":record[u"infoCode"],"datetime":record[u"datetime"],"insName":record[u"insName"],"secuName":record[u"secuName"],"secuFullCode":record[u"secuFullCode"],"title":record[u"title"],"pdfurl": getPDFUrl(record[u"infoCode"],record[u"datetime"])})
+            tjson.append({"author":record[u"author"],"infoCode":record[u"infoCode"],"datetime":record[u"datetime"],"insName":record[u"insName"],"secuName":record[u"secuName"],"secuFullCode":record[u"secuFullCode"],"title":record[u"title"],"pdfurl": getPDFUrl(record[u"infoCode"])})
             # print ({"author":record[u"author"],"infoCode":record[u"infoCode"],"datetime":record[u"datetime"],"insName":record[u"insName"],"secuName":record[u"secuName"],"secuFullCode":record[u"secuFullCode"],"title":record[u"title"],"pdfurl": getPDFUrl(record[u"infoCode"],record[u"datetime"])})
+        time.sleep(2*60)
     return tjson
 
-#all = []
+tmp = scanRange(0,46)
 
-# for k in range(1,2):
-k = 3
-print "begin {}".format(k)
-tmp = scanRange(k,k+10)
-print "got, to write to file {}".format(k)
-fname = "{}.out".format(k)
-with open(fname, 'w') as outfile:
-    for item in tmp:
+seen = set()
+
+newtmp = []
+
+for d in tmp:
+    t = tuple(d.items())
+    if t not in seen:
+        seen.add(t)
+        newtmp.append(t)
+
+with open('all.data', 'w') as outfile:
+    for item in newtmp:
         json.dump(item,outfile)
         outfile.write(',\n')
-print "end {}".format(k)
-    # time.sleep(10*60)
+
+
+
 
 
 
